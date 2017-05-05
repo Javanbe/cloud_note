@@ -18,18 +18,28 @@
 		<!-- Ueditor编辑器CSS -->
 		<link href="styles/umeditor.min.css" type="text/css" rel="stylesheet">
     <script type="text/javascript" src="scripts/jquery.min.js"></script>
+    <!-- Ueditor编辑器JS -->
+    <script type="text/javascript" charset="utf-8" src="scripts/ue/umeditor.config.js"></script>
+    <script type="text/javascript" charset="utf-8" src="scripts/ue/umeditor.min.js"></script>
+    <script type="text/javascript" src="scripts/ue/lang/zh-cn.js"></script>
+    <!-- Bootstrap框架JS -->
+    <script src="scripts/bootstrap.min.js"></script>
+    <script src="scripts/js-prototype.js"></script>       
+    <script src="scripts/theme-setup.js"></script>
     <script type="text/javascript" src="scripts/cookie_util.js"></script>
     <script type="text/javascript" src="scripts/notebook.js"></script>
     <script type="text/javascript" src="scripts/note.js"></script>
     <script type="text/javascript">
     	//从cookid获取userId
     	var userId = getCookie("uid");
+    	var um;//编辑器变量
     	//如果用户未登录，意味着userId为空，如进入编辑页面自动跳转登陆页面
     	if(userId == null){
     		window.location.href="log_in.html"
     	}
     	//页面载入后调用
     	$(function(){
+    			um = UM.getEditor('myEditor');
     			//页面载入后自动发送请求，加载笔记本列表
     			loadNoteBooks();
     			//点击笔记本加载笔记列表(给现有或未来匹配元素绑定事件)
@@ -42,56 +52,43 @@
     			//创建笔记本按钮处理
     			$("#can").on("click","#sure_addbook",sureAddBook);
     			//给添加笔记+按钮绑定处理
-    			$("#add_note").click(function(){
-    				$(".opacity_bg").show();//显示背景
-					$("#can").load("alert/alert_note.html");//显示对话框
-    			});
+    			$("#add_note").click(showAddNoteWindow);
     			//给创建笔记按钮绑定处理
-    			$("#can").on("click","#sure_addnote",function(){
-    				//获取笔记名称
-    				var noteTitle = $("#input_note").val().trim();
-    				//获取笔记id
-    				var $bookli = $("#book_list a.checked").parent();
-    				var bookId = $bookli.data("bookId");
-    				//alert(bookId);
-    				//todo检测格式
-    				if(bookId == null){
-    					alert("请选择笔记本");
-    					return;
+    			$("#can").on("click","#sure_addnote",sureAddNote);
+    			//todo给笔记li绑定单击处理
+    			$("#note_list").on("click","li",loadNote);
+    			//todo保存笔记按钮处理
+    			$("#save_note").click(updateNote);
+    			//显示笔记li菜单
+    			$("#note_list").on("click",".btn_slide_down",function(){
+    				$("#note_list .note_menu").hide();//隐藏其他笔记菜单
+    				var $li = $(this).parents("li");//获取所点击的li
+    				var $menu = $li.find(".note_menu");//获取菜单div
+    				$menu.slideDown();//显示笔记菜单
+    			});
+    			//鼠标移开将li菜单消失
+    			$("#note_list").on("mouseout",".note_menu",function(){
+    				$(this).hide();
+    			});
+    			$("#note_list").on("mouseover",".note_menu",function(){
+    				$(this).show();
+    			});
+    			//点笔记删除,弹出删除对话框
+    			$("#note_list").on("click",".btn_delete",function(){
+    				$(".opacity_bg").show();//显示背景
+		            $("#can").load("alert/alert_delete_note.html");//显示对话框
+    			});
+    			//确认删除笔记操作
+    			$("#can").on("click","#sure_recyclenote",recycleNote);
+    			//分享按钮绑定处理
+    			$("#note_list").on("click",".btn_share",shareNote);
+    			//分享笔记检索
+    			$("#search_note").keydown(function(event){
+    				var code = event.keyCode;//获取按键的ascll值
+    				//alert(code);//回车键值为13
+    				if(code == 13){
+    					
     				}
-    				//发送请求
-    				$.ajax({
-    					url:"http://localhost:8088/cloud_note/note/add.do",
-    					type:"post",
-    					data:{"noteTitle":noteTitle,"bookId":bookId,"userId":userId},
-    					dataType:"json",
-    					success:function(result){
-    						if(result.status==0){
-    							closeWindow();
-    					var noteId = result.data;//获取笔记id
-    					//拼一个笔记li
-    					var s_li = '<li class="online">';
-							s_li += '<a>';
-							s_li += '<i class="fa fa-file-text-o" title="online" rel="tooltip-bottom"></i>'+noteTitle+'<button type="button" class="btn btn-default btn-xs btn_position btn_slide_down"><i class="fa fa-chevron-down"></i></button>';
-							s_li += '</a>';
-							s_li += '<div class="note_menu" tabindex="-1">';
-							s_li += '<dl>';
-							s_li += '<dt><button type="button" class="btn btn-default btn-xs btn_move" title="移动至..."><i class="fa fa-random"></i></button></dt>';
-							s_li += '<dt><button type="button" class="btn btn-default btn-xs btn_share" title="分享"><i class="fa fa-sitemap"></i></button></dt>';
-							s_li += '<dt><button type="button" class="btn btn-default btn-xs btn_delete" title="删除"><i class="fa fa-times"></i></button></dt>';
-							s_li += '</dl>';
-							s_li += '</div>';
-							s_li += '</li>';
-						var $li = $(s_li);
-							$li.data("noteId",noteId);//给li绑定笔记ID						
-						//将笔记li添加到笔记列表区中
-							$("#note_list").prepend($li);	
-    					  }
-    					},
-    					error:function(){
-    						alert("创建笔记失败");
-    					}
-    				});
     			});
     		});
     </script> 
@@ -207,6 +204,7 @@
 						<div class="chat-contact">
 							<div class="contact-body">
 								<ul class="contacts-list">
+                                    <!-- 生成分享笔记li-->
 								</ul>
 							</div>
 						</div>
@@ -352,18 +350,12 @@
         <script type="text/javascript" src="scripts/jquery.min.js"></script>
 		<!-- 全局变量&&AJAX&&回调函数&&COOKIE -->
 		
-		<!-- Bootstrap框架JS -->
-        <script src="scripts/bootstrap.min.js"></script>
-        <script src="scripts/js-prototype.js"></script>       
-        <script src="scripts/theme-setup.js"></script>
+		
 		<!-- Google-Code代码高亮JS -->
         <script class="re-execute" src="scripts/run_prettify.js"></script>
 		<!-- 页面事件处理JS -->
         
-		<!-- Ueditor编辑器JS -->
-		<script type="text/javascript" charset="utf-8" src="scripts/ue/umeditor.config.js"></script>
-		<script type="text/javascript" charset="utf-8" src="scripts/ue/umeditor.min.js"></script>
-		<script type="text/javascript" src="scripts/ue/lang/zh-cn.js"></script>
+		
 		
 		<script type="text/javascript">
 			//重写JS原生alert函数
@@ -379,7 +371,7 @@
 			//获取特殊笔记本ID
 			//get_spnb_list();
 			//实例化Ueditor编辑器
-			var um = UM.getEditor('myEditor');
+		//	var um = UM.getEditor('myEditor');
 		</script>
 		</body>		
 </html>
