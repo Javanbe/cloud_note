@@ -1,4 +1,4 @@
-package org.tarena.note.controller;
+package org.tarena.note.controller.note;
 
 import javax.annotation.Resource;
 

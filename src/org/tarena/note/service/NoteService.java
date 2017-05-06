@@ -10,4 +10,5 @@ public interface NoteService {
 	public NoteResult recycleNote(String noteId);
 	public NoteResult shareNote(String noteId);
 	public NoteResult searchNote(String keyword);
+	public NoteResult loadShare(String shareId);
 }

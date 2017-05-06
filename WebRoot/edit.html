@@ -83,12 +83,26 @@
     			//分享按钮绑定处理
     			$("#note_list").on("click",".btn_share",shareNote);
     			//分享笔记检索
-    			$("#search_note").keydown(function(event){
-    				var code = event.keyCode;//获取按键的ascll值
-    				//alert(code);//回车键值为13
-    				if(code == 13){
-    					
-    				}
+    			$("#search_note").keydown(searchNotes);
+    			//检索结果笔记的单击处理
+    			$("#share_list").on("click","li",function(){
+    				//获取shareId
+    				var shareId = $(this).data("shareId");
+    				//发送ajax请求
+    				$.ajax({
+    					url:"http://localhost:8088/cloud_note/note/loadshare.do",
+    					type:"post",
+    					data:{"shareId":shareId},
+    					dataType:"json",
+    					success:function(result){
+    						if(result.status == 0){
+    							var share = result.data;
+    							$("#noput_note_title").text(share.cn_share_title);
+    							$("#noput_note_body").html(share.cn_share_body);    									
+    							
+    						}
+    					}
+    				});
     			});
     		});
     </script> 
@@ -203,7 +217,7 @@
 					<div class="module" data-toggle="niceScroll">
 						<div class="chat-contact">
 							<div class="contact-body">
-								<ul class="contacts-list">
+								<ul id="share_list" class="contacts-list">
                                     <!-- 生成分享笔记li-->
 								</ul>
 							</div>
@@ -301,7 +315,7 @@
 						<div class="chat-contact">
 							<div class="contact-body clear_margin">
 								<h4 id="noput_note_title"></h4>
-								<p>
+								<p id="noput_note_body">
 								</p>
 							</div>
 						</div>

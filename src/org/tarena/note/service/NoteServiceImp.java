@@ -118,4 +118,13 @@ public class NoteServiceImp implements NoteService{
 		return result;
 	}
 
+	public NoteResult loadShare(String shareId) {
+		Share share = shareDao.findById(shareId);
+		NoteResult result = new NoteResult();
+		result.setStatus(0);
+		result.setMsg("查询分享笔记成功");
+		result.setData(share);
+		return result;
+	}
+
 }

@@ -9,4 +9,5 @@ public interface ShareDao {
 	public void save(Share share);
 	public Share findByNoteId(String noteId);
 	public List<Map> findLikeTitle(String keyword);
+	public Share findById(String shareId);
 }

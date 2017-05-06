@@ -1,5 +1,10 @@
 //单击笔记本加载笔记列表
 function loadnotes(){
+		//设置全部笔记列表显示,其他列表隐藏
+	$("#pc_part_6").hide();//搜索结果列表区
+	$("#pc_part_2").show();//全部笔记列表去
+	$("#pc_part_5").hide();//笔记预览区
+	$("#pc_part_3").show();//笔记编辑区
 		//给笔记本li选中样式
 		$("#book_list li a").removeClass("checked");
 		$(this).find("a").addClass("checked");
@@ -218,4 +223,51 @@ function shareNote(){
 			alert("分享笔记失败");
 		}
 	});
+};
+
+//分享笔记搜索
+function searchNotes(event){
+	var code = event.keyCode;//获取按键的ascll值
+	//alert(code);//回车键值为13
+	if(code == 13){
+		//清除原有搜索结果列表
+		$("#share_list").empty();
+		//获取检索关键字
+		var keyword = $("#search_note").val().trim();
+		//发送ajax请求
+		$.ajax({
+			url:"http://localhost:8088/cloud_note/note/search.do",
+			type:"post",
+			data:{"keyword":keyword},
+			dataType:"json",
+			success:function(result){
+				if(result.status==0){
+					var notes = result.data;
+					//循环生成检索结果笔记li
+					for(var i = 0;i<notes.length;i++){
+						var shareId = notes[i].cn_share_id;
+						var shareTitle = notes[i].cn_share_title;
+						//拼成li
+						var s_li = '<li class="online">';
+							s_li += '<a>';
+							s_li += '<i class="fa fa-file-text-o" title="online" rel="tooltip-bottom"></i>'+shareTitle+'<button type="button" class="btn btn-default btn-xs btn_position btn_slide_down"><i class="fa fa-star"></i></button>';
+							s_li += '</a>';
+							s_li += '</li>';
+							var $li = $(s_li);
+							$li.data("shareId",shareId);
+						//添加到share_list列表中
+						$("#share_list").append($li);
+					}
+					//显示搜索结果div
+					$("#pc_part_6").show();//搜索结果列表区
+					$("#pc_part_2").hide();//全部笔记列表去
+					$("#pc_part_5").show();//笔记预览区
+					$("#pc_part_3").hide();//笔记编辑区
+				}
+			},
+			error:function(){
+				alert("查询失败");
+			}
+		});
+	}
 };
