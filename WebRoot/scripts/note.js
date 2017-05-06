@@ -153,11 +153,10 @@ function updateNote(){
 		data:{"noteId":noteId,"noteTitle":noteTitle,"noteBody":noteBody},
 		dataType:"json",
 		success:function(result){
-			if(result==0){	
-				alert("成功接收0");
+			
+			if(result.status==0){	
 				//如果标题改变,修改列表li标题
 				var liTitle = $("#note_list li a.checked").text().trim();
-				
 				if(liTitle != noteTitle){//修改
 					var s = '<i class="fa fa-file-text-o" title="online" rel="tooltip-bottom"></i>'+noteTitle+'<button type="button" class="btn btn-default btn-xs btn_position btn_slide_down"><i class="fa fa-chevron-down"></i></button>';
 					$("#note_list li a.checked").html(s);//替换选中的<a>元素的内容

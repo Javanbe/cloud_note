@@ -68,8 +68,7 @@ public class NoteServiceImp implements NoteService{
 		noteDao.update(note);//更新
 		//todo如果笔记分享,更新分享表信息
 		result.setStatus(0);
-		result.setMsg("更新笔记成功");
-		
+		result.setMsg("更新笔记成功");		
 		return result;
 	}
 
